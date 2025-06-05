@@ -5,5 +5,7 @@
 
 class TimerHelper{
     public:
-    void countdown(int seconds, std::string message)
+    void countdown(int seconds, std::string message);
 }
+
+#endif

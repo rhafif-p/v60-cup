@@ -2,7 +2,7 @@
 #include <iostream>
 #include <limits>
 
-int inputHelper::getInt(int main, int max, const std::string& message){
+int InputHelper::getInt(int main, int max, const std::string& message){
     int value;
     std::cout << message;
     while (!(std::cin>>value) || value < min || value > max) {
@@ -13,7 +13,7 @@ int inputHelper::getInt(int main, int max, const std::string& message){
     return value;
 }
 
-double inputHelper::getDouble(int main, int max, const std::string& message){
+double InputHelper::getDouble(int main, int max, const std::string& message){
     double value;
     std::cout << message;
     while (!(std::cin>>value) || value < min || value > max) {
@@ -24,7 +24,7 @@ double inputHelper::getDouble(int main, int max, const std::string& message){
     return value;
 }
 
-std::string inputHelper::getString (const std::string& message, bool allowEmpty) {
+std::string InputHelper::getString (const std::string& message, bool allowEmpty) {
     std::string value;
     while (true) {
         std::cout << message;
@@ -37,7 +37,7 @@ std::string inputHelper::getString (const std::string& message, bool allowEmpty)
     }
 }
 
-bool inputHelper::getConfirmation(const std::string& message) {
+bool InputHelper::getConfirmation(const std::string& message) {
     std::string answer;
     while (true) {
         std::cout << message << " (y/n): ";
