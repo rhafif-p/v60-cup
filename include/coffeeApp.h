@@ -3,12 +3,15 @@
 
 #include <string>
 #include <vector>
+#include "recipe.h"
+#include "json.hpp" 
+
 
 class CoffeeApp{
     private:
-    // std::vector<Recipe> recipes;
+    std::vector<Recipe> recipes;
     // std::vector<BrewLog> brewLogs;
-    const std::string RECIPE_FILENAME = "recipes_guided.txt";
+    const std::string RECIPE_FILENAME = "recipes_guided.json";
     const std::string LOG_FILENAME = "brewlogs_guided.txt";
 
     // Menu display methods
@@ -22,7 +25,7 @@ class CoffeeApp{
     void viewExistingRecipes();
     void deleteRecipe();
 
-    // Guided rbew methods
+    // Guided brewing methods
     void selectAndStartBrew();
     void recordFeedback(const std::string& recipeName, double coffeeG, double waterML, int totalTime);
     
@@ -30,7 +33,7 @@ class CoffeeApp{
     void listAllBrewLogs();
     void viewSpecificBrewLog();
 
-    // Data persistence
+    // Data loading
     void loadAllData();
     void saveAllData() const; 
     

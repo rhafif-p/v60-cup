@@ -2,6 +2,9 @@
 #include <iostream>  
 #include <numeric> 
 
+using json = nlohmann::json;
+
+
 Recipe::Recipe(const std::string& name, const std::string& bean, const std::string& grind, double coffeeG, int waterTemp, const std::string& notes)
     :recipeName(name), coffeBeanName(bean), grindSize(grind), coffeAmount(coffeeG), waterTemp(waterTemp), notes(notes), totalWaterAmount(0.0)
     {}
@@ -11,16 +14,18 @@ void Recipe::addPourStage(const PourStage& stage) {
     recalculateTotalWater();
 }
 
+void Recipe::displayRecipeSummary() const {
+    std::cout << recipeName << " (" << coffeBeanName << ") - " << coffeAmount << "g coffee, " << totalWaterAmount << "ml total water." << std::endl;
+}
+
 void Recipe::recalculateTotalWater() {
-    totalWaterAmountML = 0;
+    totalWaterAmount = 0;
     for(const auto& s : pourStages) {
-        totalWaterAmountML += s.waterAmountML;
+        totalWaterAmount += s.waterAmount;
     }
 }
 
-void Recipe::displayFullRecipeDetails() const{
-    std::cout << recipeName <<< " (" << coffeeBeanOrigin << ") - " << coffeeAmountGrams << "g coffee, " << totalWaterAmountML << "ml total water." << std::endl;
-}
+
 
 void Recipe::displayFullRecipeDetails() const {
     std::cout << "\n--- Recipe: " << recipeName << " ---" << std::endl;
@@ -55,11 +60,11 @@ void to_json(json& j, const Recipe& r) {
 
 void from_json(const json& j, Recipe& r) {
     r.recipeName = j.value("recipeName", "Unnamed Recipe");
-    r.coffeeBeanOrigin = j.value("coffeeBeanOrigin", "Unknown Origin");
-    r.grindSizeDescription = j.value("grindSizeDescription", "N/A");
-    r.coffeeAmountGrams = j.value("coffeeAmountGrams", 0.0);
-    r.waterTemperatureCelsius = j.value("waterTemperatureCelsius", 90);
-    r.generalNotes = j.value("generalNotes", "");
+    r.coffeBeanName = j.value("coffeeBeanOrigin", "Unknown Origin");
+    r.grindSize = j.value("grindSizeDescription", "N/A");
+    r.coffeAmount = j.value("coffeeAmountGrams", 0.0);
+    r.waterTemp = j.value("waterTemperatureCelsius", 90);
+    r.notes = j.value("generalNotes", "");
     
     if (j.contains("pourStages") && j.at("pourStages").is_array()) {
         r.pourStages.clear();

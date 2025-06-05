@@ -1,25 +1,26 @@
 #include "../../include/utils/inputHelper.h"
 #include <iostream>
 #include <limits>
+#include <iomanip> 
 
-int InputHelper::getInt(int main, int max, const std::string& message){
+int InputHelper::getInt(int min, int max, const std::string& message){
     int value;
     std::cout << message;
     while (!(std::cin>>value) || value < min || value > max) {
         std::cout << "Invalid input. Please enter a value between " << min << " and "<< max<< ":";
         std::cin.clear();
-        std::cin.ignore(numeric_limits<streamsize::max(),'\n');
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     return value;
 }
 
-double InputHelper::getDouble(int main, int max, const std::string& message){
+double InputHelper::getDouble(int min, int max, const std::string& message){
     double value;
     std::cout << message;
     while (!(std::cin>>value) || value < min || value > max) {
         std::cout << "Invalid input. Please enter a value between " << min << " and "<< max<< ":";
         std::cin.clear();
-        std::cin.ignore(numeric_limits<streamsize::max(),'\n');
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     return value;
 }

@@ -6,11 +6,12 @@
 
 class InputHelper {
     public:
-    static int getInt(int main, int max, const std::string& message);
-    static double getDouble(int main, int max, const std::string& message);
-    static float getFloat(int main, int max, const std::string& message);
-    static std::string getString(const std::string& message, bool allowEmpty = FALSE);
+    static int getInt(int min, int max, const std::string& message);
+    static double getDouble(int min, int max, const std::string& message);
+    static float getFloat(int min, int max, const std::string& message);
+    static std::string getString(const std::string& message, bool allowEmpty = false);
     static bool getConfirmation(const std::string& message);
+    
 };
 
 #endif

@@ -18,12 +18,11 @@ class Recipe{
     double coffeAmount;
     double totalWaterAmount;
     int waterTemp;
-    vector<PourStage> pourStages;
+    std::vector<PourStage> pourStages;
     std::string notes;
     
 
-    Recipe(const std::string& name, const std::string& bean, const std::string& grind, double coffeeG, int waterTemp, const std::string& notes);
-    
+    Recipe(const std::string& name = "", const std::string& bean = "", const std::string& grind = "", double coffeeG = 0.0, int waterTemp = 90, const std::string& notes = "");    
     void addPourStage(const PourStage& stage);
     void displayRecipeSummary() const;
     void displayFullRecipeDetails() const;
@@ -33,6 +32,6 @@ class Recipe{
     friend void from_json(const nlohmann::json& j, Recipe& r);
     
     const std::vector<PourStage>& getPourStages() const { return pourStages; }
-}
+};
 
 #endif
