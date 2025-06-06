@@ -103,7 +103,7 @@ void CoffeeApp::manageRecipesSubMenu(){
         std::cout << "3. Delete recipe"<<std::endl;
         std::cout << "4. Back"<<std::endl;
 
-        int recipeChoice  = InputHelper::getInt( 1, 4, "input your choice");
+        int recipeChoice  = InputHelper::getInt( 1, 4, "input your choice : ");
         switch(recipeChoice){
             case 1:
                 createNewRecipe();
