@@ -1,7 +1,8 @@
 #include "coffeeApp.h"
 #include "utils/inputHelper.h" 
 #include "pourStage.h" 
-#include "json.hpp" 
+#include "json.hpp"
+#include "brewSession.h" 
 #include <iostream>
 #include <fstream>
 #include <limits>    
@@ -40,6 +41,33 @@ void CoffeeApp::loadAllData() {
     }
     std::cout << recipes.size() << " recipes loaded." << std::endl;
 
+    std::cout << "Loading brew logs from " << LOG_FILENAME << "..." << std::endl;
+    std::ifstream logFile(LOG_FILENAME);
+    if (logFile.is_open()) {
+        try {
+            json logsJsonArray;
+            logFile >> logsJsonArray;
+             if (logsJsonArray.is_array()) {
+                brewLogs.clear(); // Clear existing logs
+                brewLogs = logsJsonArray.get<std::vector<BrewLog>>();
+            } else if (logsJsonArray.is_null()) {
+                std::cout << "Brew log file is empty or contains null. No logs loaded." << std::endl;
+            }
+            else {
+                 std::cerr << "Error: Brew log file does not contain a valid JSON array." << std::endl;
+            }
+        } catch (const json::parse_error& e) {
+            std::cerr << "Error parsing brew log file " << LOG_FILENAME << ": " << e.what() << std::endl;
+        } catch (const json::type_error& e) {
+            std::cerr << "Type error during brew log deserialization (file: " << LOG_FILENAME << "): " << e.what() << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "An unexpected error occurred loading brew logs from " << LOG_FILENAME << ": " << e.what() << std::endl;
+        }
+        logFile.close();
+    } else {
+        std::cout << "Brew log file (" << LOG_FILENAME << ") not found. Starting with no logs." << std::endl;
+    }
+    std::cout << brewLogs.size() << " brew logs loaded." << std::endl;
 }
 
 CoffeeApp::~CoffeeApp() {
@@ -53,13 +81,25 @@ void CoffeeApp::saveAllData() const {
     if (recipeFile.is_open()) {
 
         json recipesJson = recipes; 
-        recipeFile << recipesJson.dump(2); //create space between logs
+        recipeFile << recipesJson.dump(4); // .dump(4) for pretty printing with 4 spaces indent
         recipeFile.close();
     } else {
         std::cerr << "Error: Could not open recipe file (" << RECIPE_FILENAME << ") for saving." << std::endl;
     }
     std::cout << recipes.size() << " recipes saved." << std::endl;
+
+    std::cout << "Saving brew logs to " << LOG_FILENAME << "..." << std::endl;
+    std::ofstream logFile(LOG_FILENAME);
+    if (logFile.is_open()) {
+        json logsJson = brewLogs; 
+        logFile << logsJson.dump(4); 
+        logFile.close();
+    } else {
+        std::cerr << "Error: Could not open brew log file (" << LOG_FILENAME << ") for saving." << std::endl;
+    }
+    std::cout << brewLogs.size() << " brew logs saved." << std::endl;
 }
+
 
 void CoffeeApp::start() {
     bool running = true;
@@ -71,10 +111,10 @@ void CoffeeApp::start() {
                 manageRecipesSubMenu();
                 break;
             case 2:
-                // performGuidedBrewSubMenu();
+                performGuidedBrewSubMenu();
                 break;
             case 3:
-                // viewBrewHistorySubMenu();
+                viewBrewHistorySubMenu();
                 break;
             case 4:
                 saveAllData(); 
@@ -115,8 +155,7 @@ void CoffeeApp::manageRecipesSubMenu(){
                 deleteRecipe();
                 break;
             case 4:
-                inSubMenu = false   ;
-
+                inSubMenu = false  ;
                 break;  
         }
 
@@ -194,4 +233,120 @@ void CoffeeApp::deleteRecipe() {
     } else {
         std::cout << "Deletion cancelled." << std::endl;
     }
+}
+
+void CoffeeApp::performGuidedBrewSubMenu() {
+    std::cout << "\n--- Perform Guided Brew ---" << std::endl;
+    if (recipes.empty()) {
+        std::cout << "No recipes available to start a brew. Please create a recipe first." << std::endl;
+        return;
+    }
+    std::cout << "Select a recipe to brew:" << std::endl;
+    for (size_t i = 0; i < recipes.size(); ++i) {
+        std::cout << (i + 1) << ". ";
+        recipes[i].displayRecipeSummary(); 
+    }
+    int recipeChoice = InputHelper::getInt( 1, recipes.size(), "Enter recipe number: ");
+    const Recipe& selectedRecipe = recipes[recipeChoice - 1]; 
+    
+    std::cout << "\nPreparing to brew with: ";
+    selectedRecipe.displayRecipeSummary();
+    selectedRecipe.displayFullRecipeDetails(); 
+    
+    if (!InputHelper::getConfirmation("Start brewing with this recipe?")) {
+        std::cout << "Brewing cancelled." << std::endl;
+        return;
+    }
+
+    BrewSession session(selectedRecipe); 
+    int totalBrewTimeSecondsFromStages = 0;
+
+    while(session.startNextStage()) { 
+        session.displayCurrentStageInstructions(); 
+        std::cout << "Press Enter to start this stage, or type 'c' then Enter to cancel brew: ";
+        std::string userInput;
+        std::getline(std::cin, userInput);
+        if (userInput == "c" || userInput == "C") {
+            std::cout << "Brewing cancelled mid-session." << std::endl;
+            return;
+        }
+        
+        session.runStageTimer(); 
+        totalBrewTimeSecondsFromStages += session.getCurrentPourStage().duration; 
+    }
+
+    std::cout << "\nBrewing complete!" << std::endl;
+    std::cout << "Total estimated brew time from recipe stages: " << totalBrewTimeSecondsFromStages << " seconds." << std::endl;
+    
+    recordFeedback(selectedRecipe.recipeName, selectedRecipe.coffeAmount, selectedRecipe.totalWaterAmount, totalBrewTimeSecondsFromStages);
+}
+
+void CoffeeApp::recordFeedback(const std::string& recipeName, double coffeeG, double waterML, int totalTimeSeconds) {
+    std::cout << "\n--- Record Post-Brew Feedback ---" << std::endl;
+    std::string dateTime = InputHelper::getString("Enter Brew Date/Time : ", true); 
+    std::string notes = InputHelper::getString("Tasting Notes (optional): ", true);
+    std::string acidity = InputHelper::getString("Acidity Rating : ", true);
+    std::string body = InputHelper::getString("Body Rating : ", true);
+    std::string overall = InputHelper::getString("Overall Rating : ", true);
+
+    brewLogs.emplace_back(dateTime.empty() ? "N/A" : dateTime, 
+                          recipeName, coffeeG, waterML, totalTimeSeconds,
+                          notes.empty() ? "N/A" : notes, 
+                          acidity.empty() ? "N/A" : acidity, 
+                          body.empty() ? "N/A" : body, 
+                          overall.empty() ? "N/A" : overall);
+    std::cout << "Brew log and feedback recorded." << std::endl;
+}
+
+void CoffeeApp::viewBrewHistorySubMenu() {
+     bool inSubMenu = true;
+    while(inSubMenu) {
+        std::cout << "\n--- View Brew History ---" << std::endl;
+        std::cout << "1. List All Brew Logs" << std::endl;
+        std::cout << "2. View Specific Brew Log Detail" << std::endl;
+        std::cout << "3. Back to Main Menu" << std::endl;
+
+        int choice = InputHelper::getInt( 1, 3, "History Menu Choice: ");
+        switch (choice) {
+            case 1: 
+                listAllBrewLogs(); 
+                break;
+            case 2: 
+                viewSpecificBrewLog(); 
+                break;
+            case 3:
+                inSubMenu = false;
+                break; 
+            default: std::cout << "Invalid choice." << std::endl;
+        }
+         if(inSubMenu) {
+            std::cout << "\nPress Enter to return to history menu...";
+            std::cin.get();
+        }
+    }
+}
+
+void CoffeeApp::listAllBrewLogs() {
+    std::cout << "\n--- All Brew Logs ---" << std::endl;
+    if (brewLogs.empty()) {
+        std::cout << "No brew logs available." << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < brewLogs.size(); ++i) {
+        std::cout << (i + 1) << ". Date: " << brewLogs[i].logDateTime 
+                  << ", Recipe: " << brewLogs[i].recipeUsed << std::endl;
+    }
+}
+
+void CoffeeApp::viewSpecificBrewLog() {
+    std::cout << "\n--- View Detailed Brew Log ---" << std::endl;
+    if (brewLogs.empty()) {
+        std::cout << "No brew logs to view." << std::endl;
+        return;
+    }
+    listAllBrewLogs(); 
+    if (brewLogs.empty()) return; 
+
+    int choice = InputHelper::getInt( 1, brewLogs.size(), "Enter log number to view details: ");
+    brewLogs[choice - 1].displayLogDetails(); 
 }

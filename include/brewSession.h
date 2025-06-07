@@ -10,7 +10,7 @@ class BrewSession {
 private:
     Recipe currentRecipe; 
     int currentStageIndex;
-    TimerUtil brewTimer; 
+    TimerHelper brewTimer; 
 
 public:
     BrewSession(const Recipe& recipeToBrew); 

@@ -1,1 +1,30 @@
-[]
+[
+    {
+        "coffeeAmountGrams": 15.0,
+        "coffeeBeanOrigin": "Argopuro",
+        "generalNotes": "",
+        "grindSizeDescription": "medium-fine",
+        "pourStages": [
+            {
+                "durationSeconds": 45,
+                "instruction": "swirling",
+                "stageName": "Blooming",
+                "waterAmountML": 50.0
+            },
+            {
+                "durationSeconds": 90,
+                "instruction": "circular pouring",
+                "stageName": "firsty pour",
+                "waterAmountML": 90.0
+            },
+            {
+                "durationSeconds": 130,
+                "instruction": "drip",
+                "stageName": "Final Pour",
+                "waterAmountML": 150.0
+            }
+        ],
+        "recipeName": "Jeff Hoffman",
+        "waterTemperatureCelsius": 95
+    }
+]

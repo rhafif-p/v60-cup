@@ -4,15 +4,18 @@
 #include <string>
 #include <vector>
 #include "recipe.h"
-#include "json.hpp" 
+#include "json.hpp"
+#include "brewLog.h"
+#include "brewSession.h"
+ 
 
 
 class CoffeeApp{
     private:
     std::vector<Recipe> recipes;
-    // std::vector<BrewLog> brewLogs;
+    std::vector<BrewLog> brewLogs;
     const std::string RECIPE_FILENAME = "recipes_guided.json";
-    const std::string LOG_FILENAME = "brewlogs_guided.txt";
+    const std::string LOG_FILENAME = "brewlogs_guided.json";
 
     // Menu display methods
     void displayMainMenu();

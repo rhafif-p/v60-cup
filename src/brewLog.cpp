@@ -20,7 +20,7 @@ void BrewLog::displayLogDetails() const {
     std::cout << "Tasting Notes: " << (tastingNotes.empty() ? "N/A" : tastingNotes) << std::endl;
     std::cout << "Acidity: " << (acidityRating.empty() ? "N/A" : acidityRating) << std::endl;
     std::cout << "Body: " << (bodyRating.empty() ? "N/A" : bodyRating) << std::endl;
-    std::cout << "Overall Rating: " << (overallRating.empty() ? "N/A" : overallRating) << std::endl;
+    std::cout << "Overall Rating: " << (finalRating.empty() ? "N/A" : finalRating) << std::endl;
     std::cout << "-------------------------" << std::endl;
 }
 
@@ -36,7 +36,7 @@ void to_json(json& j, const BrewLog& bl) {
         {"tastingNotes", bl.tastingNotes},
         {"acidityRating", bl.acidityRating},
         {"bodyRating", bl.bodyRating},
-        {"overallRating", bl.overallRating}
+        {"overallRating", bl.finalRating}
     };
 }
 
@@ -49,5 +49,5 @@ void from_json(const json& j, BrewLog& bl) {
     bl.tastingNotes = j.value("tastingNotes", "");
     bl.acidityRating = j.value("acidityRating", "");
     bl.bodyRating = j.value("bodyRating", "");
-    bl.overallRating = j.value("overallRating", "");
+    bl.finalRating = j.value("overallRating", "");
 }

@@ -1,6 +1,11 @@
 #include "brewSession.h"
 #include <iostream> 
 
+
+using json = nlohmann::json;
+
+
+
 BrewSession::BrewSession(const Recipe& recipeToBrew) 
     : currentRecipe(recipeToBrew), currentStageIndex(-1) {}
 
@@ -30,7 +35,7 @@ void BrewSession::runStageTimer() {
     if (currentStageIndex >= 0 && currentStageIndex < currentRecipe.getPourStages().size()) {
         const auto& stage = currentRecipe.getPourStages()[currentStageIndex];
         std::string timerMessage = stage.stageName + ": " + stage.instruction;
-        brewTimer.countdown(stage.durationSeconds, timerMessage);
+        brewTimer.countdown(stage.duration, timerMessage);
     }
 }
 
